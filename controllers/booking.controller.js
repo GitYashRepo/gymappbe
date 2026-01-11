@@ -161,7 +161,31 @@ exports.getPodAvailability = async (req, res) => {
 
 
 /**
- * 3️⃣ GET USER BOOKINGS
+ * ADMIN: GET ALL BOOKINGS
+ * GET /api/admin/bookings
+ */
+exports.getAllBookingsAdmin = async (req, res) => {
+  try {
+    const bookings = await Booking.find()
+      .populate("gymPod", "name locationName")
+      .populate("user", "name email phone")
+      .sort({ startTime: -1 });
+
+    res.status(200).json({
+      success: true,
+      data: bookings,
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
+
+/**
+ * USER: GET MY BOOKINGS
  * GET /api/bookings/my
  */
 exports.getMyBookings = async (req, res) => {
@@ -170,24 +194,26 @@ exports.getMyBookings = async (req, res) => {
       .populate("gymPod", "name locationName images")
       .sort({ startTime: -1 });
 
-    // Auto mark completed
+    // Auto-mark completed
     const now = new Date();
-    bookings.forEach(b => {
-      if (b.status === "booked" && b.endTime < now) {
-        b.status = "completed";
-        b.save();
-      }
-    });
+    await Promise.all(
+      bookings.map(async (b) => {
+        if (b.status === "booked" && b.endTime < now) {
+          b.status = "completed";
+          await b.save();
+        }
+      })
+    );
 
     res.status(200).json({
       success: true,
-      data: bookings
+      data: bookings,
     });
-
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
 };
+
 
 /**
  * 4️⃣ CANCEL BOOKING

@@ -7,6 +7,7 @@ const {
   cancelBooking,
   createMultiSlotBooking,
   uploadPaymentProof,
+  getAllBookingsAdmin,
 } = require("../controllers/booking.controller");
 const auth = require("../middlewares/auth.middleware");
 const paymentUpload = require("../middlewares/paymentUpload.middleware");
@@ -38,6 +39,8 @@ router.get(
 
 // User bookings
 router.get("/my", protect, getMyBookings);
+
+router.get("/", protect, getAllBookingsAdmin);
 
 // Cancel
 router.patch(

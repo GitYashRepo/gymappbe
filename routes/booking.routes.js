@@ -40,7 +40,7 @@ router.get(
 // User bookings
 router.get("/my", protect, getMyBookings);
 
-router.get("/", protect, getAllBookingsAdmin);
+router.get("/", protect,    getAllBookingsAdmin);
 
 // Cancel
 router.patch(

@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const Booking = require("../models/Booking");
 const GymPod = require("../models/GymPod");
 const Notification = require("../models/Notification");
+const Payment = require("../models/Payment");
 
 exports.createMultiSlotBooking = async (req, res) => {
   try {
@@ -13,6 +14,7 @@ exports.createMultiSlotBooking = async (req, res) => {
   slotsCount,
   personsCount,
   bookingType,
+  paymentId,
 } = req.body
 
     const pod = await GymPod.findById(gymPodId);
@@ -30,7 +32,24 @@ exports.createMultiSlotBooking = async (req, res) => {
   personsCount: Number(personsCount),
   bookingType,
   status: bookingType === "same_day" ? "confirmed" : "pending_payment",
-})
+});
+
+
+// 🔗 LINK PAYPAL PAYMENT TO BOOKING
+if (paymentId) {
+  const payment = await Payment.findById(paymentId);
+
+  if (!payment) {
+    return res.status(400).json({ message: "Invalid payment reference" });
+  }
+
+  if (payment.status !== "COMPLETED") {
+    return res.status(400).json({ message: "Payment not completed" });
+  }
+
+  payment.booking = booking._id;
+  await payment.save();
+}
 
 
     // 🔔 NOTIFICATION — BOOKING CREATED

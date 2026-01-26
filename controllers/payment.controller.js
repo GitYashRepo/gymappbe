@@ -1,6 +1,9 @@
 const checkoutNodeJssdk = require("@paypal/checkout-server-sdk");
 const paypalClient = require("../config/paypal.js");
 const Payment = require("../models/Payment.js");
+const Booking = require("../models/Booking");
+const GymPod = require("../models/GymPod");
+
 
 exports.createPayPalOrder = async (req, res) => {
   try {
@@ -51,10 +54,12 @@ exports.createPayPalOrder = async (req, res) => {
    });
 
   } catch (error) {
-    console.error("Create PayPal Order Error:", error);
-    res.status(500).json({ message: "Unable to create PayPal order" });
-  }
-};
+  console.error("❌ PAYPAL ORDER ERROR:", error?.message || error);
+  res.status(500).json({
+    message: "Unable to create PayPal order",
+    error: error?.message,
+  });
+}}
 
 
 exports.confirmAndBook = async (req, res) => {
